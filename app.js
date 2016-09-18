@@ -14,14 +14,18 @@ const channels = process.env.TWITCH_CHANNELS.split(',')
 const game = process.env.GAME
 const showLog = process.env.SHOW_LOG
 const bot = new telegramBot(telegramBotToken, {polling: true})
-const streamURL = _.template('https://api.twitch.tv/kraken/streams/${user}')
+const twitch = axios.create({
+  baseURL: 'https://api.twitch.tv/kraken/streams/',
+  headers: {'Accept': 'application/vnd.twitchtv.v2+json'}
+})
+twitch.defaults.headers['Client-ID'] = process.env.TWITCH_CLIENT_ID
 
 withHash = (channels) => _.map(channels, (channel) => '#' + channel)
 
 const client = new irc.Client('irc.chat.twitch.tv', twitchNickname, { password: twitchPassword, channels: withHash(channels) })
 
 checkChannels = () => {
-  const requests = _.map(channels, (user) => axios.get(streamURL({user: user})))
+  const requests = _.map(channels, (user) => twitch.get(user))
 
   axios.all(requests).then((response) => {
     const onlineChannels = getOnline(response)
