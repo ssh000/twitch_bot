@@ -1,10 +1,8 @@
 require('dotenv').config()
 const _ = require('lodash')
 const irc = require('irc')
-const winston = require('winston')
 const axios = require('axios')
 const telegramBot = require('node-telegram-bot-api')
-winston.add(winston.transports.File, { filename: 'messages.log' })
 
 const twitchNickname = process.env.TWITCH_NICKNAME
 const twitchPassword = process.env.TWITCH_PASSWORD
@@ -49,14 +47,11 @@ client.addListener('message', (from, to, message) => {
   const reg = new RegExp('@' + twitchNickname)
 
   if(message.match(reg)){
-    winston.info('%s@%s: %s', to, from, message)
     bot.sendMessage(telegramUserId, message)
   }
   if(showLog === 'true') console.log(to, '=>', from, ':', message)
 })
 
-client.addListener('error', (message) => {
-  winston.error(message)
-})
+client.addListener('error', (message) => { })
 
 bot.onText(/\/streams/, (msg, match) => checkChannels())
